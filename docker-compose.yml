@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   db:
-    container_name: Digital_logistics
+    container_name: Digital_logistics_keycloack
     image: postgres:latest
     restart: always
     environment:
@@ -18,7 +18,7 @@ services:
       - jenkins-net
 
   pgadmin:
-    container_name: pgadmin-DigitalLogistics
+    container_name: pgadmin-DigitalLogistics_keycloack
     image: dpage/pgadmin4:latest
     restart: always
     environment:
@@ -33,7 +33,7 @@ services:
 
   jenkins:
     image: jenkins/jenkins:lts-jdk17
-    container_name: jenkins_test
+    container_name: jenkins_test_keycloack
     privileged: true
     user: root
     restart: always
@@ -51,8 +51,12 @@ services:
 
   sonarqube:
     image: sonarqube:community
+<<<<<<< Updated upstream
     container_name: sonarqubee
     restart: always
+=======
+    container_name: sonarqube_keycloack
+>>>>>>> Stashed changes
     ports:
       - "9001:9000"
     environment:
