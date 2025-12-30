@@ -1,45 +1,52 @@
 version: "3.8"
 
 services:
-
   db:
-    container_name: Digital_logistics_keycloack
-    image: postgres:latest
-    restart: always
+    container_name: digital-logistics-postgres
+    image: postgres:15-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: rajabarca
       POSTGRES_DB: DigitalLogistics_db
+      PGDATA: /var/lib/postgresql/data/pgdata  # Nouveau répertoire de données
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data/pgdata  # Changement du chemin
     networks:
       - jenkins-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   pgadmin:
-    container_name: pgadmin-DigitalLogistics_keycloack
+    container_name: digital-logistics-pgadmin
     image: dpage/pgadmin4:latest
-    restart: always
+    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: yassine@gmail.com
       PGADMIN_DEFAULT_PASSWORD: 123456
     ports:
       - "8081:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - jenkins-net
 
   jenkins:
     image: jenkins/jenkins:lts-jdk17
-    container_name: jenkins_test_keycloack
+    container_name: jenkins-keycloak
     privileged: true
     user: root
-    restart: always
+    restart: unless-stopped
     ports:
       - "8083:8080"
-      - "50001:50001"
+      - "50000:50000"
     environment:
       JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
     volumes:
@@ -51,12 +58,8 @@ services:
 
   sonarqube:
     image: sonarqube:community
-<<<<<<< Updated upstream
-    container_name: sonarqubee
-    restart: always
-=======
-    container_name: sonarqube_keycloack
->>>>>>> Stashed changes
+    container_name: sonarqube-keycloak
+    restart: unless-stopped
     ports:
       - "9001:9000"
     environment:
@@ -70,32 +73,46 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.5
-    container_name: keycloak-DigitalLogistics
-    restart: always
+    container_name: keycloak-digital-logistics
+    restart: unless-stopped
     environment:
       KC_DB: postgres
       KC_DB_URL_HOST: db
+      KC_DB_URL_PORT: 5432
       KC_DB_URL_DATABASE: DigitalLogistics_db
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: rajabarca
+      KC_DB_SCHEMA: public
 
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin123
+
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HEALTH_ENABLED: "true"
     command: start-dev
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - jenkins-net
 
 volumes:
   db_data:
+    name: digital_logistics_db_data  # Nom explicite
   jenkins_data:
+    name: digital_logistics_jenkins_data
   sonarqube_data:
+    name: digital_logistics_sonarqube_data
   sonarqube_extensions:
+    name: digital_logistics_sonarqube_extensions
   sonarqube_logs:
+    name: digital_logistics_sonarqube_logs
 
 networks:
   jenkins-net:
     driver: bridge
+    name: digital_logistics_jenkins_net
