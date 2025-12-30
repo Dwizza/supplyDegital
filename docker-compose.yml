@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+
+  db:
+    container_name: Digital_logistics
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rajabarca
+      POSTGRES_DB: DigitalLogistics_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql
+    networks:
+      - jenkins-net
+
+  pgadmin:
+    container_name: pgadmin-DigitalLogistics
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: yassine@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    ports:
+      - "8081:80"
+    networks:
+      - jenkins-net
+
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins_test
+    privileged: true
+    user: root
+    ports:
+      - "8083:8080"
+      - "50001:50001"
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./src:/var/jenkins_data/workspace/src
+    networks:
+      - jenkins-net
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - "9001:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - jenkins-net
+
+volumes:
+  db_data:
+  jenkins_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+
+networks:
+  jenkins-net:
+    driver: bridge
