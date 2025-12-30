@@ -13,7 +13,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql
+      - db_data:/var/lib/postgresql/data
     networks:
       - jenkins-net
 
@@ -26,6 +26,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: 123456
     ports:
       - "8081:80"
+    depends_on:
+      - db
     networks:
       - jenkins-net
 
@@ -34,6 +36,7 @@ services:
     container_name: jenkins_test
     privileged: true
     user: root
+    restart: always
     ports:
       - "8083:8080"
       - "50001:50001"
@@ -48,7 +51,8 @@ services:
 
   sonarqube:
     image: sonarqube:community
-    container_name: sonarqube
+    container_name: sonarqubee
+    restart: always
     ports:
       - "9001:9000"
     environment:
@@ -57,6 +61,27 @@ services:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - jenkins-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: keycloak-DigitalLogistics
+    restart: always
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: db
+      KC_DB_URL_DATABASE: DigitalLogistics_db
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: rajabarca
+
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    command: start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
     networks:
       - jenkins-net
 
