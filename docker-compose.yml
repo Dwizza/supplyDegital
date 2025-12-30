@@ -88,12 +88,12 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin123
 
       KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_PORT: 8082
       KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       KC_HEALTH_ENABLED: "true"
     command: start-dev
     ports:
-      - "8080:8080"
+      - "8082:8080"
     depends_on:
       db:
         condition: service_healthy
