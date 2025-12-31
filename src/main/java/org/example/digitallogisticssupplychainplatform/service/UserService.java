@@ -18,7 +18,7 @@ public class UserService {
 
     private final UserRepository repo;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
+
 
 
     public UserResponseDto createUser(UserDto userDto) {
@@ -29,8 +29,7 @@ public class UserService {
 
         User user = userMapper.toEntity(userDto);
 
-        String hashedPassword = passwordEncoder.encode(userDto.getPassword());
-        user.setPassword(hashedPassword);
+        user.setPassword(null);
 
         User savedUser = repo.save(user);
 
@@ -69,31 +68,13 @@ public class UserService {
         existingUser.setEmail(userDto.getEmail());
         existingUser.setRole(userDto.getRole());
         existingUser.setActive(userDto.getActive());
-
-        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-
-            if (isAlreadyHashed(userDto.getPassword())) {
-                existingUser.setPassword(userDto.getPassword());
-            } else {
-                String hashedPassword = passwordEncoder.encode(userDto.getPassword());
-                existingUser.setPassword(hashedPassword);
-            }
-        }
+        existingUser.setPassword(null);
 
         User updatedUser = repo.save(existingUser);
 
         return userMapper.toResponseDto(updatedUser);
     }
 
-
-    private boolean isAlreadyHashed(String password) {
-        if (password == null) {
-            return false;
-        }
-        return password.startsWith("$2a$") ||
-                password.startsWith("$2b$") ||
-                password.startsWith("$2y$");
-    }
 
 
     public UserResponseDto deactivateUser(Long id) {

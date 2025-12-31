@@ -45,7 +45,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         // ✅ INITIALISER AVEC 3 PARAMÈTRES
-        userService = new UserService(userRepository, userMapper, passwordEncoder);
+        userService = new UserService(userRepository, userMapper);
 
         // ✅ CONFIGURER LE MOCK PASSWORDENCODER (lenient car pas utilisé dans tous les tests)
         lenient().when(passwordEncoder.encode("password123"))
