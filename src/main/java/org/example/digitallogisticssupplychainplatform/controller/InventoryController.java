@@ -46,8 +46,9 @@ public class InventoryController {
             InventoryDTO saved = inventoryService.save(inventoryDTO);
             return new ResponseEntity<>(saved, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().body(null);
+           Map<String,String> err=new HashMap<>();
+           err.put("err",e.toString());
+           return ResponseEntity.ok(err);
         }
     }
 
